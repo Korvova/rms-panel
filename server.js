@@ -487,13 +487,14 @@ function generateRoomHTML(room, events, currentEvent, isFree) {
         }
     }
 
-    // Определяем что показывать в футере - всегда следующее событие
-    let footerContent = null;
+    // Определяем что показывать в футере - всегда показываем
+    let footerContent;
     if (nextEvent) {
         const nextTime = new Date(nextEvent.dateFrom).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
         footerContent = `Следующее: ${escapeHtml(nextEvent.name || 'Событие')} в ${nextTime}`;
+    } else {
+        footerContent = 'На сегодня ближайших событий не запланировано';
     }
-    // Если нет следующего события - footerContent остаётся null и футер не показываем
 
     // Фоновая картинка
     const backgroundStyle = room.background
@@ -568,13 +569,19 @@ function generateRoomHTML(room, events, currentEvent, isFree) {
             background: rgba(255, 0, 0, 0.35);
         }
         .current-event.booked h2 {
-            font-size: 5rem;
+            font-size: 3rem;
             margin: 0;
+        }
+        .event-name-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 10px 20px 0 20px;
         }
         .current-event .event-name {
             font-size: 2rem;
-            text-align: center;
-            margin: 10px 0 0 0;
+            text-align: left;
+            max-width: calc(100% - 80px);
         }
         .current-event .details {
             position: absolute;
@@ -656,7 +663,7 @@ function generateRoomHTML(room, events, currentEvent, isFree) {
                 <h2>Свободно</h2>
             ` : `
                 <h2>Занято</h2>
-                <div class="event-name">${escapeHtml(currentEvent?.name || 'Событие')}</div>
+                <div class="event-name-wrapper"><div class="event-name">${escapeHtml(currentEvent?.name || 'Событие')}</div></div>
                 <div class="details">
                     ${currentEvent?.organizer ? `<p>Организатор: ${escapeHtml(currentEvent.organizer)}</p>` : ''}
                     <p>Время: ${formatTime(currentEvent?.dateFrom)} - ${formatTime(currentEvent?.dateTo)}</p>
@@ -673,11 +680,9 @@ function generateRoomHTML(room, events, currentEvent, isFree) {
         </div>
     </div>
 
-    ${footerContent ? `
     <div class="glass footer">
         <span>${footerContent}</span>
     </div>
-    ` : ''}
 
     <script>
         function updateClock() {
