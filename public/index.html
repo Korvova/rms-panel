@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RMS Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .logo {
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 24px;
+            color: #888;
+            margin-bottom: 40px;
+        }
+
+        .status {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .status-item {
+            background: rgba(255,255,255,0.1);
+            padding: 20px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-item .value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .status-item .label {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .time {
+            font-size: 96px;
+            font-weight: 200;
+            margin-bottom: 10px;
+        }
+
+        .date {
+            font-size: 24px;
+            color: #888;
+        }
+
+        .led-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        .led-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .led-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px currentColor;
+        }
+
+        .led-btn.red { background: #ff4444; }
+        .led-btn.green { background: #44ff44; }
+        .led-btn.blue { background: #4444ff; }
+        .led-btn.white { background: #ffffff; }
+        .led-btn.off { background: #333; }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(0,255,0,0.2);
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .connection-status.connected {
+            background: rgba(0,255,0,0.2);
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status connected">
+        ● Подключено
+    </div>
+
+    <div class="container">
+        <div class="logo">🏨</div>
+        <h1>RMS Panel</h1>
+        <p class="subtitle">Панель бронирования</p>
+
+        <div class="time" id="time">00:00:00</div>
+        <div class="date" id="date">Загрузка...</div>
+
+        <div class="status">
+            <div class="status-item">
+                <div class="value" id="room">101</div>
+                <div class="label">Комната</div>
+            </div>
+            <div class="status-item">
+                <div class="value" id="status">Свободно</div>
+                <div class="label">Статус</div>
+            </div>
+        </div>
+
+        <div class="led-buttons">
+            <button class="led-btn red" onclick="setLed('red')" title="Красный"></button>
+            <button class="led-btn green" onclick="setLed('green')" title="Зелёный"></button>
+            <button class="led-btn blue" onclick="setLed('blue')" title="Синий"></button>
+            <button class="led-btn white" onclick="setLed('white')" title="Белый"></button>
+            <button class="led-btn off" onclick="setLed('off')" title="Выкл"></button>
+        </div>
+    </div>
+
+    <script>
+        // Обновление времени
+        function updateTime() {
+            const now = new Date();
+
+            const time = now.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            const date = now.toLocaleDateString('ru-RU', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+
+            document.getElementById('time').textContent = time;
+            document.getElementById('date').textContent = date.charAt(0).toUpperCase() + date.slice(1);
+        }
+
+        // Управление LED через URL параметр (для Android WebView)
+        function setLed(color) {
+            // Для Android приложения - переход по URL с параметром
+            window.location.href = window.location.origin + '/?rmspanel=' + color;
+        }
+
+        // Запуск
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        console.log('✅ RMS Panel загружена');
+    </script>
+</body>
+</html>

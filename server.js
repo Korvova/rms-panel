@@ -480,17 +480,13 @@ function generateRoomHTML(room, events, currentEvent, isFree) {
         }
     }
 
-    // Определяем что показывать в футере
+    // Определяем что показывать в футере - всегда следующее событие
     let footerContent = null;
-    if (!isFree && currentEvent) {
-        // Занято - показываем название текущего события
-        footerContent = escapeHtml(currentEvent.name || 'Событие');
-    } else if (isFree && nextEvent) {
-        // Свободно и есть ближайшее - показываем его
+    if (nextEvent) {
         const nextTime = new Date(nextEvent.dateFrom).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
         footerContent = `Следующее: ${escapeHtml(nextEvent.name || 'Событие')} в ${nextTime}`;
     }
-    // Если нет событий - footerContent остаётся null и футер не показываем
+    // Если нет следующего события - footerContent остаётся null и футер не показываем
 
     // Фоновая картинка
     const backgroundStyle = room.background
@@ -622,7 +618,7 @@ function generateRoomHTML(room, events, currentEvent, isFree) {
         }
         .footer {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             gap: 20px;
             background: rgba(24, 22, 22, 0.5);
