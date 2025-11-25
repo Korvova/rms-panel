@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
 const xml2js = require('xml2js');
-const { v4: uuidv4 } = require('uuid');
+// uuid больше не нужен - используем простые числовые ID
 const os = require('os');
 const multer = require('multer');
 
@@ -71,6 +71,13 @@ function loadRooms() {
 // Сохранение комнат
 function saveRooms(rooms) {
     fs.writeFileSync(ROOMS_FILE, JSON.stringify(rooms, null, 2));
+}
+
+// Генерация следующего числового ID
+function getNextRoomId(rooms) {
+    const ids = Object.keys(rooms).map(id => parseInt(id)).filter(id => !isNaN(id));
+    if (ids.length === 0) return '1';
+    return String(Math.max(...ids) + 1);
 }
 
 // Получение IP адресов сервера
@@ -257,7 +264,7 @@ app.post('/api/rooms', (req, res) => {
     }
 
     const rooms = loadRooms();
-    const id = uuidv4().substring(0, 8);
+    const id = getNextRoomId(rooms);
 
     rooms[id] = {
         id,
