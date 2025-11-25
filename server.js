@@ -536,6 +536,12 @@ function generateRoomHTML(room, events, currentEvent, isFree) {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
         html, body {
             height: 100vh;
