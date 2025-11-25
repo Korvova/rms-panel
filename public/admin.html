@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RMS Panel - Админка</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .server-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .server-info code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 0 5px;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .room-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .room-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #00d4ff;
+        }
+
+        .room-card .url-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+
+        .room-card .url-box .label {
+            color: #888;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .room-card .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .room-card .status.free {
+            background: rgba(0, 200, 83, 0.3);
+            color: #00c853;
+        }
+
+        .room-card .status.booked {
+            background: rgba(220, 53, 69, 0.3);
+            color: #dc3545;
+        }
+
+        .room-card .caldav-info {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 15px;
+        }
+
+        .room-card .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #00d4ff;
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: #00b8e6;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .add-room-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 250px;
+        }
+
+        .add-room-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .add-room-card .plus {
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .add-room-card span {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #888;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: #00d4ff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 5px;
+        }
+
+        .copy-btn:hover {
+            text-decoration: underline;
+        }
+
+        .events-list {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .events-list h4 {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .event-item {
+            background: rgba(0,0,0,0.2);
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+
+        .event-item .time {
+            color: #00d4ff;
+        }
+
+        .no-events {
+            color: #666;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+        }
+
+        .background-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .background-section h4 {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .background-preview {
+            width: 100%;
+            height: 100px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 0.9rem;
+            border: 2px dashed rgba(255,255,255,0.2);
+        }
+
+        .background-preview.has-image {
+            border: none;
+        }
+
+        .background-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .background-actions input[type="file"] {
+            display: none;
+        }
+
+        .background-actions label {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .background-actions label:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RMS Panel</h1>
+
+        <div class="server-info" id="serverInfo">
+            Загрузка...
+        </div>
+
+        <div class="rooms-grid" id="roomsGrid">
+            <div class="loading">Загрузка комнат...</div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления/редактирования -->
+    <div class="modal" id="roomModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Добавить комнату</h2>
+            <form id="roomForm">
+                <input type="hidden" id="roomId">
+
+                <div class="form-group">
+                    <label for="roomName">Название комнаты *</label>
+                    <input type="text" id="roomName" placeholder="Например: Владивосток" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="caldavUrl">CalDAV URL</label>
+                    <input type="text" id="caldavUrl" placeholder="https://calendar.example.com/dav/...">
+                    <small>URL календаря в формате CalDAV или прямая ссылка на .ics файл</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="caldavUsername">Логин</label>
+                    <input type="text" id="caldavUsername" placeholder="user@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="caldavPassword">Пароль</label>
+                    <input type="password" id="caldavPassword" placeholder="Пароль для CalDAV">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let serverData = { rooms: {}, serverIPs: [], port: 8080 };
+
+        // Загрузка данных
+        async function loadData() {
+            try {
+                const response = await fetch('/api/rooms');
+                serverData = await response.json();
+                renderServerInfo();
+                renderRooms();
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+            }
+        }
+
+        // Отображение информации о сервере
+        function renderServerInfo() {
+            const { serverIPs, port } = serverData;
+            const ip = serverIPs[0] || 'localhost';
+
+            document.getElementById('serverInfo').innerHTML = `
+                Сервер доступен по адресу: <code>http://${ip}:${port}/</code>
+                <br><small style="color: #888">Используйте URL комнаты из карточки для планшета</small>
+            `;
+        }
+
+        // Отображение комнат
+        function renderRooms() {
+            const grid = document.getElementById('roomsGrid');
+            const rooms = Object.values(serverData.rooms);
+
+            let html = '';
+
+            for (const room of rooms) {
+                const ip = serverData.serverIPs[0] || 'localhost';
+                const roomUrl = `http://${ip}:${serverData.port}/room/${room.id}`;
+
+                html += `
+                    <div class="room-card" data-room-id="${room.id}">
+                        <h3>${escapeHtml(room.name)}</h3>
+
+                        <div class="url-box">
+                            <div class="label">URL для планшета:</div>
+                            <div>${roomUrl}</div>
+                            <button class="copy-btn" onclick="copyToClipboard('${roomUrl}')">Копировать</button>
+                        </div>
+
+                        <div class="status-container" id="status-${room.id}">
+                            <span class="status">Загрузка...</span>
+                        </div>
+
+                        <div class="caldav-info">
+                            ${room.caldavUrl ? '✓ CalDAV настроен' : '⚠ CalDAV не настроен'}
+                        </div>
+
+                        <div class="events-list" id="events-${room.id}">
+                            <h4>События сегодня:</h4>
+                            <div class="loading">Загрузка...</div>
+                        </div>
+
+                        <div class="background-section">
+                            <h4>Фоновое изображение:</h4>
+                            <div class="background-preview ${room.background ? 'has-image' : ''}"
+                                 id="bg-preview-${room.id}"
+                                 style="${room.background ? `background-image: url('${room.background}')` : ''}">
+                                ${room.background ? '' : 'Нет изображения'}
+                            </div>
+                            <div class="background-actions">
+                                <input type="file" id="bg-input-${room.id}" accept="image/*" onchange="uploadBackground('${room.id}', this)">
+                                <label for="bg-input-${room.id}">Загрузить</label>
+                                ${room.background ? `<button class="btn btn-danger btn-sm" onclick="deleteBackground('${room.id}')">Удалить</button>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="actions">
+                            <button class="btn btn-secondary" onclick="editRoom('${room.id}')">Редактировать</button>
+                            <button class="btn btn-danger" onclick="deleteRoom('${room.id}')">Удалить</button>
+                            <a href="/room/${room.id}" target="_blank" class="btn btn-primary">Открыть</a>
+                        </div>
+                    </div>
+                `;
+
+                // Загружаем события для комнаты
+                loadRoomEvents(room.id);
+            }
+
+            // Карточка добавления
+            html += `
+                <div class="add-room-card" onclick="openAddModal()">
+                    <div class="plus">+</div>
+                    <span>Добавить комнату</span>
+                </div>
+            `;
+
+            grid.innerHTML = html;
+        }
+
+        // Загрузка событий комнаты
+        async function loadRoomEvents(roomId) {
+            try {
+                const response = await fetch(`/api/rooms/${roomId}/events`);
+                const data = await response.json();
+
+                // Обновляем статус
+                const statusContainer = document.getElementById(`status-${roomId}`);
+                if (statusContainer) {
+                    statusContainer.innerHTML = data.isFree
+                        ? '<span class="status free">Свободно</span>'
+                        : '<span class="status booked">Занято</span>';
+                }
+
+                // Обновляем список событий
+                const eventsContainer = document.getElementById(`events-${roomId}`);
+                if (eventsContainer) {
+                    if (data.events.length === 0) {
+                        eventsContainer.innerHTML = `
+                            <h4>События сегодня:</h4>
+                            <div class="no-events">Нет событий</div>
+                        `;
+                    } else {
+                        const eventsHtml = data.events.map(event => {
+                            const start = new Date(event.dateFrom).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                            const end = new Date(event.dateTo).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+                            return `
+                                <div class="event-item">
+                                    <span class="time">${start} - ${end}</span>
+                                    ${escapeHtml(event.name || 'Событие')}
+                                </div>
+                            `;
+                        }).join('');
+
+                        eventsContainer.innerHTML = `
+                            <h4>События сегодня:</h4>
+                            ${eventsHtml}
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки событий:', error);
+            }
+        }
+
+        // Открыть модал добавления
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Добавить комнату';
+            document.getElementById('roomId').value = '';
+            document.getElementById('roomName').value = '';
+            document.getElementById('caldavUrl').value = '';
+            document.getElementById('caldavUsername').value = '';
+            document.getElementById('caldavPassword').value = '';
+            document.getElementById('roomModal').classList.add('active');
+        }
+
+        // Редактирование комнаты
+        function editRoom(roomId) {
+            const room = serverData.rooms[roomId];
+            if (!room) return;
+
+            document.getElementById('modalTitle').textContent = 'Редактировать комнату';
+            document.getElementById('roomId').value = roomId;
+            document.getElementById('roomName').value = room.name;
+            document.getElementById('caldavUrl').value = room.caldavUrl || '';
+            document.getElementById('caldavUsername').value = room.username || '';
+            document.getElementById('caldavPassword').value = room.password || '';
+            document.getElementById('roomModal').classList.add('active');
+        }
+
+        // Закрыть модал
+        function closeModal() {
+            document.getElementById('roomModal').classList.remove('active');
+        }
+
+        // Отправка формы
+        document.getElementById('roomForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const roomId = document.getElementById('roomId').value;
+            const data = {
+                name: document.getElementById('roomName').value,
+                caldavUrl: document.getElementById('caldavUrl').value,
+                username: document.getElementById('caldavUsername').value,
+                password: document.getElementById('caldavPassword').value
+            };
+
+            try {
+                const url = roomId ? `/api/rooms/${roomId}` : '/api/rooms';
+                const method = roomId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    closeModal();
+                    loadData();
+                } else {
+                    const error = await response.json();
+                    alert(error.error || 'Ошибка сохранения');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Ошибка сохранения');
+            }
+        });
+
+        // Удаление комнаты
+        async function deleteRoom(roomId) {
+            if (!confirm('Удалить комнату?')) return;
+
+            try {
+                const response = await fetch(`/api/rooms/${roomId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    loadData();
+                }
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
+            }
+        }
+
+        // Копирование в буфер
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Скопировано: ' + text);
+            });
+        }
+
+        // Загрузка фоновой картинки
+        async function uploadBackground(roomId, input) {
+            if (!input.files || !input.files[0]) return;
+
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append('background', file);
+
+            try {
+                const response = await fetch(`/api/rooms/${roomId}/background`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    loadData(); // Перезагружаем данные
+                } else {
+                    const error = await response.json();
+                    alert(error.error || 'Ошибка загрузки');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Ошибка загрузки изображения');
+            }
+        }
+
+        // Удаление фоновой картинки
+        async function deleteBackground(roomId) {
+            if (!confirm('Удалить фоновое изображение?')) return;
+
+            try {
+                const response = await fetch(`/api/rooms/${roomId}/background`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadData();
+                } else {
+                    alert('Ошибка удаления');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Ошибка удаления');
+            }
+        }
+
+        // Экранирование HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Закрытие модала по клику вне
+        document.getElementById('roomModal').addEventListener('click', (e) => {
+            if (e.target.id === 'roomModal') {
+                closeModal();
+            }
+        });
+
+        // Загрузка при старте
+        loadData();
+
+        // Обновление каждые 30 секунд
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html>
