@@ -507,8 +507,31 @@ function generateRoomHTML(room, events, currentEvent, isFree) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Переговорная «${escapeHtml(room.name)}»</title>
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;500&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'Raleway';
+            font-style: normal;
+            font-weight: 200;
+            src: url('/fonts/raleway-200.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Raleway';
+            font-style: normal;
+            font-weight: 300;
+            src: url('/fonts/raleway-300.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Raleway';
+            font-style: normal;
+            font-weight: 400;
+            src: url('/fonts/raleway-400.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Raleway';
+            font-style: normal;
+            font-weight: 500;
+            src: url('/fonts/raleway-500.woff2') format('woff2');
+        }
         * {
             margin: 0;
             padding: 0;
