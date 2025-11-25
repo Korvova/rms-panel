@@ -507,17 +507,21 @@ function generateRoomHTML(room, events, currentEvent, isFree) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Переговорная «${escapeHtml(room.name)}»</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;500&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+        }
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Raleway', sans-serif;
+            font-weight: 300;
             ${backgroundStyle}
-            min-height: 100vh;
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -526,50 +530,59 @@ function generateRoomHTML(room, events, currentEvent, isFree) {
             backdrop-filter: blur(10px);
             background: rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            padding: 20px;
+            padding: 15px;
             border-radius: 15px;
-            margin: 10px;
+            margin: 8px;
         }
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
         }
         .header h1 {
-            font-size: 1.8rem;
+            font-size: clamp(1rem, 3vw, 1.8rem);
+            font-weight: 300;
         }
         #clock {
-            font-size: 2rem;
-            font-weight: 500;
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            font-weight: 200;
         }
         .main {
             display: flex;
             flex: 1;
-            gap: 15px;
-            padding: 15px;
+            gap: 10px;
+            padding: 10px;
+            min-height: 0;
+            overflow: hidden;
+            align-items: center;
         }
         .current-event {
-            flex: 1;
+            flex: 0 1 auto;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             position: relative;
-            margin: 15vh 10px;
             backdrop-filter: blur(5px);
+            padding: 70px 50px;
+            margin: auto 8px;
+            min-width: 70%;
         }
         .current-event.free {
             background: rgba(0, 239, 64, 0.35);
         }
         .current-event.free h2 {
-            font-size: 5rem;
+            font-size: clamp(3rem, 10vh, 6rem);
+            font-weight: 200;
             margin: 0;
         }
         .current-event.booked {
             background: rgba(255, 0, 0, 0.35);
         }
         .current-event.booked h2 {
-            font-size: 3rem;
+            font-size: clamp(2rem, 6vh, 4rem);
+            font-weight: 200;
             margin: 0;
         }
         .event-name-wrapper {
@@ -579,64 +592,73 @@ function generateRoomHTML(room, events, currentEvent, isFree) {
             margin: 10px 20px 0 20px;
         }
         .current-event .event-name {
-            font-size: 2rem;
+            font-size: clamp(1.2rem, 4vh, 2.5rem);
+            font-weight: 300;
             text-align: left;
-            max-width: calc(100% - 80px);
+            max-width: calc(100% - 60px);
         }
         .current-event .details {
             position: absolute;
             bottom: 15px;
             left: 15px;
-            font-size: 1.1rem;
+            font-size: clamp(0.9rem, 2.2vh, 1.3rem);
             text-align: left;
         }
         .current-event .details p {
             margin: 2px 0;
         }
         .schedule {
-            flex: 1;
+            flex: 0 0 280px;
             display: flex;
             flex-direction: column;
-            max-width: 300px;
             background: rgba(24, 22, 22, 0.5);
             backdrop-filter: blur(10px);
+            min-height: 0;
+            overflow: hidden;
+            align-self: stretch;
         }
         .schedule h2 {
-            margin-bottom: 15px;
-            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-size: clamp(1rem, 2.5vh, 1.5rem);
+            font-weight: 300;
+            flex-shrink: 0;
         }
         .schedule ul {
             list-style: none;
-            max-height: 500px;
+            flex: 1;
             overflow-y: auto;
+            min-height: 0;
         }
         .schedule li {
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 10px;
+            padding: 8px;
+            margin-bottom: 6px;
+            border-radius: 8px;
             background: rgba(255, 255, 255, 0.1);
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 3px;
         }
         .schedule li.current {
             background: rgba(220, 53, 69, 0.4);
             border-left: 4px solid #dc3545;
         }
         .schedule li .time {
-            font-size: 0.9rem;
+            font-size: clamp(0.7rem, 1.5vh, 0.9rem);
             opacity: 0.8;
         }
         .schedule li .name {
-            font-weight: 500;
+            font-weight: 400;
+            font-size: clamp(0.8rem, 1.8vh, 1rem);
         }
         .footer {
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             background: rgba(24, 22, 22, 0.5);
             backdrop-filter: blur(10px);
+            flex-shrink: 0;
+            font-size: clamp(0.8rem, 2vh, 1rem);
         }
         @media (max-width: 768px) {
             .main {
@@ -644,9 +666,18 @@ function generateRoomHTML(room, events, currentEvent, isFree) {
             }
             .schedule {
                 max-width: 100%;
+                flex: 0 0 auto;
+                max-height: 30vh;
             }
-            .current-event h2 {
-                font-size: 2.5rem;
+        }
+        @media (max-height: 600px) {
+            .glass {
+                padding: 10px;
+                margin: 5px;
+                border-radius: 10px;
+            }
+            .schedule {
+                display: none;
             }
         }
     </style>
